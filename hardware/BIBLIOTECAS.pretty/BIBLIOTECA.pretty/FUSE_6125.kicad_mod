@@ -1,0 +1,116 @@
+(footprint "FUSE_6125"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0.46 0.51 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "0054d847-eeb4-4d95-96dd-a50bccd76bac")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "FUSE_6125"
+		(at 0 2.62 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "ebccf490-5c27-43ac-9951-9876dc4fc5a0")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Footprint" ""
+		(at 0 1.62 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9c729c8d-67da-4fbb-8674-3d086fa36312")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 1.62 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "fad6e588-5450-4c79-a6ab-3dc067a787b0")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 1.62 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "006a3b19-fb82-4e94-9470-b00c12adb3bb")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -3.05 -3.25)
+		(end 3.05 -3.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "433ab286-b937-4f45-be7b-0f2b43c831af")
+	)
+	(fp_line
+		(start -3.05 -0.75)
+		(end 3.05 -0.75)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "69138188-3311-4a47-a7d9-0b73ccc6a575")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 4.12 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "e99d9c74-8f8c-437a-893a-6a3893a5634a")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd roundrect
+		(at -2.25 -2)
+		(size 1.6 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "66ed5b0f-b7f0-4e73-8d1e-b0572f36cc65")
+	)
+	(pad "2" smd roundrect
+		(at 2.25 -2)
+		(size 1.6 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "d5c116ff-e19a-4c72-927a-0a7ce6f8bd06")
+	)
+)

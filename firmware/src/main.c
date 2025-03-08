@@ -6,64 +6,59 @@
 #define F_CPU 16000000UL
 #endif
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <stdio.h>
-#include "adc.h"
-#include "usart.h"
-#include "pwm.h"
+#include "main.h"
 
-#define set_bit(reg, bit) ((reg) |= (1 << (bit))) // Declaração
-volatile uint16_t control_VP = 0;
-volatile uint16_t control_IP = 0;
-volatile uint16_t control_VB = 0;
-volatile uint16_t potenciaInit = 0;
-volatile uint16_t potenciaGeral = 0;
-volatile uint16_t control_D = 100;
 int main(void)
 {
-    sei();
-
+    #ifdef USART_ON
     usart_init(UBRR_VALUE,1,1);                         // inicializa a usart
-    usart_send_string("\n\n\nUSART... OK!\n\n\n\r");
-    
+    usart_send_string("\n\n\nUSART... OK!\n");
+    #endif
+
+    _delay_ms(1000);
+
+    #ifdef PWM_ON
+    usart_send_string("PWM...");
     pwm_init();
-    usart_send_string("\n\n\nTimer1... OK!\n\n\n\r");
+    set_EN_driver();
+    usart_send_string(" OK!\n");
+    #endif
 
-    OCR1A = control_D;
+    #ifdef ADC_ON
+    usart_send_string("ADC...");
+    adc_init();
+    usart_send_string(" OK!\n");
+    #else
+    usart_send_string("ADC... OFF!\n");
+    #endif
 
+    #ifdef WATCHDOG_ON
+    usart_send_string("WATCHDOG...");
+    wdt_init();
+    usart_send_string(" OK!\n");
+    #else
+    usart_send_string("WATCHDOG... OFF!\n");
+    #endif
 
-    set_bit(DDRB,PB3);
-    set_bit(PORTB,PB3);
-        
-    set_bit(DDRC,PC5);
-    set_bit(PORTC,PC5);
+    #ifdef MACHINE_ON
+    usart_send_string("MACHINE...");
+    machine_init();
+    state_machine = STATE_INITIALIZING;
+    usart_send_string(" OK!\n");
+    #else
+    usart_send_string("MACHINE... OFF!\n");
+    #endif
 
-    usart_send_string("\n\n\nADC... OK!\n\n\n\r");
-    adc_init();                                         // inicializa ADC
-    
-    
-    while(1){ 
-        control_IP = ma_adc0();
-        control_VP = ma_adc1();
-        control_VB = ma_adc2();
+    sei();
+    while(1){
+       // #ifdef WATCHDOG_ON
+          //  wdt_reset();
+		//#endif
 
-        usart_send_string("Ipanel: ");
-        usart_send_float(IpanelToFloat(control_IP),4);
-        _delay_ms(200);
-
-        usart_send_string(" Vpanel: ");
-        usart_send_float(VpanelToFloat(control_VP),4);
-        _delay_ms(200);
-
-        usart_send_string(" Vbatt: ");
-        usart_send_float(VbattToFloat(control_VB),4);
-        _delay_ms(200);
-
-        usart_send_string("\n");
-        
+        #ifdef MACHINE_ON
+            machine_run();
+        #endif
 
     }
-
     return 0;
 }

@@ -1,4 +1,6 @@
 #include "pwm.h"
+#include "PeO.h"
+#include "usart.h"
 
 void pwm_init(void)
 {
@@ -29,4 +31,52 @@ void pwm_init(void)
     OCR1A = INITIAL_D;                              // set initial Duty Cycle
     set_bit(PWM_DDR, PWM);                          // PWM as output
 
+}
+void pwm_reset(void)
+{
+    set_pwm_off();
+#ifdef MACHINE_ON
+    control.D = 0;
+#endif
+    usart_send_string("PWM turned off!\n");
+}
+void pwm_compute(void){
+#ifdef MACHINE_ON
+    
+    if(!control.sweep_done){
+        sweep_duty();
+    }else{
+        perturb_and_observe();
+    }
+    
+   // perturb_and_observe();
+
+    // apply some threshhold saturation limits
+    if(control.D > PWM_D_MAX)        control.D = PWM_D_MAX;
+    else if(control.D < PWM_D_MIN)   control.D = PWM_D_MIN;
+
+
+
+    // apply dutycycle
+    OCR1A = control.D;
+
+ 
+
+    static uint8_t pwm_clk_divider = 0;
+    if(pwm_clk_divider++ == PWM_CLK_DIVIDER_VALUE){
+        pwm_clk_divider = 0;
+        usart_send_string("PWM computed as: ");
+        usart_send_uint16((control.D));
+        usart_send_char('\n');
+
+        usart_send_string(" Vpanel: ");
+        usart_send_float(control.v_panel[0], 4);
+        usart_send_string(" Ipanel: ");
+        usart_send_float(control.i_panel[0],4);
+        usart_send_string(" Vbatt: ");
+        usart_send_uint16(ma_adc2());
+        usart_send_char('\n');
+    }
+#endif
+    
 }

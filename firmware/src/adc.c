@@ -1,5 +1,9 @@
 #include "adc.h"
-#include "usart.h"
+
+#ifdef USART_ON
+    #include "usart.h"
+#endif
+
 #include <util/delay.h>
 volatile uint8_t ADC_CHANNEL = 0;
 volatile float ADC_CONVERTER = 0;
@@ -42,41 +46,18 @@ uint16_t ma_adc2(void)
     return avg_adc2;
 }
 
-float IpanelToFloat(int adcValue) {
-    // Calcula a parte inteira (em volts)
-    int inteiro = (adcValue * 5) / 1023;
-    // Calcula o resto
-    int resto = (adcValue * 5) % 1023;
-    // Combina a parte inteira com a parte decimal
-    float resultado = inteiro + (float)resto / 1023;
-
-    return resultado;
+float vpanel_to_float(uint16_t vpanel_adc)
+{
+  return 0.020717284 * (float)vpanel_adc - 0.057896889;
 }
 
-float VpanelToFloat(int adcValue) {
-    // Calcula a parte inteira (em volts)
-    int inteiro = (adcValue * 21) / 1023;
-    // Calcula o resto
-    int resto = (adcValue * 21) % 1023;
-    // Combina a parte inteira com a parte decimal
-    float resultado = inteiro + (float)resto / 1023;
-
-    return resultado;
-}
-
-float VbattToFloat(int adcValue) {
-    // Calcula a parte inteira (em volts)
-    int inteiro = (adcValue * 60) / 1023;
-    // Calcula o resto
-    int resto = (adcValue * 60) % 1023;
-    // Combina a parte inteira com a parte decimal
-    float resultado = inteiro + (float)resto / 1023;
-
-    return resultado;
+float ipanel_to_float(uint16_t ipanel_adc)
+{
+    return 0.032923627 * (float)ipanel_adc - 16.62932491;
 }
 
 void adc_init(void) {
-    
+    adc_data_ready = 0;
     // Configuração do PORTC para pull-up
     PORTC = 0x00;  // Desativa pull-ups
     DDRC = 0x00;   // Configura todos os pinos de PORTC como entrada
@@ -106,46 +87,40 @@ void adc_init(void) {
                 | (0 << COM0B1) | (0 << COM0B0);        // do nothing with OC0B
         TCCR0B  =   (0 << WGM02)                        // Timer 0 in Mode 2 = CTC (clear on compare)
                 | (0 << FOC0A) | (0 << FOC0B)           // dont force outputs
-                | (1 << CS02)                           // clock enabled, prescaller = 1024
-                | (0 << CS01)
-                | (1 << CS00);
+                | (0 << CS02)                           // clock enabled, prescaller = 64
+                | (1 << CS01)
+                | (0 << CS00);
 
-        OCR0A  =    20;                                 // Valor para igualdade de comparacao A para frequencia de ~1500 Hz
+        OCR0A  =    199;                                 // Valor para igualdade de comparacao A para frequencia de ~5000 Hz
         TIMSK0 |=   (1 << OCIE0A);                      // Ativa a interrupcao na igualdade de comparação do TC0 com OCR0A
-        
+
         init_buffers();
-        
+       
 }
 
 ISR(ADC_vect){    
     switch(ADC_CHANNEL){
         case 0:
             CBUF_Push(cbuf_adc0, ADC); 
-            //usart_send_string("\nIpanel:\r");
-            //_delay_ms(200);
             ADC_CHANNEL = 1;
             break;
         case 1:
             CBUF_Push(cbuf_adc1, ADC); 
-            //usart_send_string("\nVpanel:\r");
-            //_delay_ms(200);
             ADC_CHANNEL = 2;
             break;
         case 2:
             CBUF_Push(cbuf_adc2, ADC);
-           // usart_send_string("\nVbatt:\r");
-            //_delay_ms(200);
+            adc_data_ready = 1;
             ADC_CHANNEL = 0;
             break;
         default:
-            ADC_CHANNEL = 0; // Se algo der errado, reseta para 0
+            adc_data_ready = 1;
+            ADC_CHANNEL = 0; 
             break;
     }
 
-    // Agora sim, atualiza o canal do ADC no ADMUX
+    
     ADMUX = (ADMUX & 0xF8) | ADC_CHANNEL;
-    //ADC_CONVERTER = adcToFloat(ADC);
-    //usart_send_float(ADC_CONVERTER, 4);
-    //usart_send_string("\r");
+
 }
 EMPTY_INTERRUPT(TIMER0_COMPA_vect);

@@ -11,18 +11,18 @@ MPPT Battery charger
 | Efficiency        | > 90%     |
 
 
-## 3D Model
+## Modelo 3D
 
-<img style="background-color:white"  src="images/top.png" alt="3D" align="center" width="600"/>
-<img style="background-color:white"  src="images/bottom.png" alt="3D" align="center" width="600"/>
+<img style="background-color:white"  src="images/top.png" alt="3D" align="center" width="400"/>
+<img style="background-color:white"  src="images/bottom.png" alt="3D" align="center" width="400"/>
 
-## Soldered board
+## Placa Soldada
 
-<img style="background-color:white"  src="images/Real_top.jpeg" alt="Soldered" align="center" width="600"/>
-<img style="background-color:white"  src="images/Real_bottom.jpeg" alt="Soldered" align="center" width="600"/>
-<img style="background-color:white"  src="images/Real_Side.jpeg" alt="Soldered" align="center" width="600"/>
+<img style="background-color:white"  src="images/Real_top.jpeg" alt="Soldered" align="center" width="400"/>
+<img style="background-color:white"  src="images/Real_bottom.jpeg" alt="Soldered" align="center" width="400"/>
+<img style="background-color:white"  src="images/Real_Side.jpeg" alt="Soldered" align="center" width="400"/>
 
-# Testing Guide for the MCC22 Board
+# Guia de montagem da placa MCC25
 
 Follow the steps below, if any value differs from the expected, abort the test. Power off and on after each step. Always limit the power source to 18V at 100mA. Use this [link]() to find components on the board.
 

@@ -26,16 +26,25 @@ A placa foi projetada de modo a facilitar a montagem da mesma, porém é necess�
 # Passo a Passo
 
 1. Realizar a troca do resistor R20 de valor 15OHMs para um resistor de 4.7OHMs.
-   <img style="background-color:white"  src="images/R20.png" alt="Soldered" align="center" widt.h="200"/>
+   
+   <img style="background-color:white"  src="images/R20.png" alt="Montagem" align="center" widt.h="200"/>
+   
 2. Isolar pino de referência do sensor de efeito HALL "U2" raspando as trilhas conectadas ao GND, em ambos os lados da placa, como demonstrado na imagem:
-   <img style="background-color:white"  src="Hall_reference.jpeg" alt="Soldered" align="center" widt.h="200"/>
+   
+   <img style="background-color:white"  src="images/Hall_reference.jpeg" alt="Montagem" align="center" widt.h="200"/>
+   
 3. Não realizar a solda do resistor R7, ele será soldado em outro local da placa.
-   <img style="background-color:white"  src="images/Real_top.jpeg" alt="Soldered" align="center" widt.h="200"/>
+   
+   <img style="background-color:white"  src="images/R7.png" alt="Montagem" align="center" widt.h="200"/>
+   
 4. Após isolar o pino de referência do sensor de efeito HALL, realizar a solda dele normalmente. Após isso, realizar a solda de um resistor de 150OHMs entre o pino de referência e output do sensor como na imagem. (Certificar-se que não há curto)
-   <img style="background-color:white"  src="images/Real_top.jpeg" alt="Soldered" align="center" widt.h="200"/>
+   
+   <img style="background-color:white"  src="images/RES_HALL.jpeg" alt="Montagem" align="center" widt.h="200"/>
+   
 5. Montagem do snubber verificar necessidade, mas dica de montagem, diodo TVS Schottiky 100V, capacitor de 4.7nF 100V e resistor 4.7KOhmns 3W.
-   <img style="background-color:white"  src="images/Real_top.jpeg" alt="Soldered" align="center" widt.h="200"/>
+   
+   <img style="background-color:white"  src="images/Snubber.jpeg" alt="Montagem" align="center" widt.h="200"/>
 
-## Tests
+## Testes
 
-All tests are in [this](./tests/tests.md) separated document.
+Em processo...

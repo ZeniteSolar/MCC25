@@ -32,7 +32,7 @@ A placa foi projetada para facilitar a montagem, mas é necessário tomar alguns
 | Passo | Instruções | Imagem |
 |------|------------|--------|
 | **1** | Realizar a troca do resistor R20 de 15Ω para um resistor de 4.7Ω. | <img src="images/R20.png" alt="Montagem" width="200"/> |
-| **2** | Isolar o pino de referência do sensor de efeito HALL "U2" raspando as trilhas conectadas ao GND, em ambos os lados da placa. | <img src="images/Hall_reference.jpeg" alt="Montagem" width="200"/> |
+| **2** | Isolar o pino de referência do sensor de efeito HALL "U2" raspando as trilhas conectadas ao GND, em ambos os lados da placa.( Somente raspar as trilhas relacionadas ao pino de referência, o resto manter igual ) | <img src="images/Hall_reference.jpeg" alt="Montagem" width="200"/> |
 | **3** | Não realizar a solda do resistor R7, pois ele será soldado em outro local da placa. | <img src="images/R7.png" alt="Montagem" width="200"/> |
 | **4** | Após isolar o pino de referência do sensor de efeito HALL, realizar a solda dele normalmente. Em seguida, soldar um resistor de 150Ω entre o pino de referência e o output do sensor. (Certificar-se de que não há curto-circuito). | <img src="images/RES_HALL.jpeg" alt="Montagem" width="200"/> |
 | **5** | Montagem do snubber: verificar a necessidade, mas a dica de montagem é usar um diodo TVS Schottky 100V, capacitor de 4.7nF 100V e resistor 4.7KΩ 3W. | <img src="images/Snubber.jpeg" alt="Montagem" width="200"/> |

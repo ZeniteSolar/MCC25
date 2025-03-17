@@ -1,6 +1,6 @@
 # MCC25
-MCC25
-MPPT Battery charger
+MCC25  
+MPPT Battery charger  
 
 | Input Voltage     | 0 ~ 21 V  |
 | ----------------: | :-------- |
@@ -8,42 +8,30 @@ MPPT Battery charger
 | Output Power      | 200 W     |
 | Efficiency        | > 90%     |
 
-
 ## Modelo 3D
 
-<img style="background-color:white"  src="images/top.png" alt="3D" align="center" width="400"/>
-<img style="background-color:white"  src="images/bottom.png" alt="3D" align="center" width="400"/>
+<img src="images/top.png" alt="3D" width="400"/>
+<img src="images/bottom.png" alt="3D" width="400"/>
 
 ## Placa Soldada
 
-<img style="background-color:white"  src="images/Real_top.jpeg" alt="Soldered" align="center" width="400"/>
-<img style="background-color:white"  src="images/Real_bottom.jpeg" alt="Soldered" align="center" width="400"/>
-<img style="background-color:white"  src="images/Real_Side.jpeg" alt="Soldered" align="center" width="400"/>
+<img src="images/Real_top.jpeg" alt="Soldered" width="400"/>
+<img src="images/Real_bottom.jpeg" alt="Soldered" width="400"/>
+<img src="images/Real_Side.jpeg" alt="Soldered" width="400"/>
 
 # Guia de montagem da placa MCC25
 
-A placa foi projetada de modo a facilitar a montagem da mesma, porém é necessário tomar alguns cuidados em sua montagem, pois existem algumas alterações no projeto.
-# Passo a Passo
+A placa foi projetada para facilitar a montagem, mas é necessário tomar alguns cuidados devido a algumas alterações no projeto.
 
-1. Realizar a troca do resistor R20 de valor 15OHMs para um resistor de 4.7OHMs.
-   
-   <img style="background-color:white"  src="images/R20.png" alt="Montagem" align="center" widt.h="200"/>
-   
-2. Isolar pino de referência do sensor de efeito HALL "U2" raspando as trilhas conectadas ao GND, em ambos os lados da placa, como demonstrado na imagem:
-   
-   <img style="background-color:white"  src="images/Hall_reference.jpeg" alt="Montagem" align="center" widt.h="200"/>
-   
-3. Não realizar a solda do resistor R7, ele será soldado em outro local da placa.
-   
-   <img style="background-color:white"  src="images/R7.png" alt="Montagem" align="center" widt.h="200"/>
-   
-4. Após isolar o pino de referência do sensor de efeito HALL, realizar a solda dele normalmente. Após isso, realizar a solda de um resistor de 150OHMs entre o pino de referência e output do sensor como na imagem. (Certificar-se que não há curto)
-   
-   <img style="background-color:white"  src="images/RES_HALL.jpeg" alt="Montagem" align="center" widt.h="200"/>
-   
-5. Montagem do snubber verificar necessidade, mas dica de montagem, diodo TVS Schottiky 100V, capacitor de 4.7nF 100V e resistor 4.7KOhmns 3W.
-   
-   <img style="background-color:white"  src="images/Snubber.jpeg" alt="Montagem" align="center" widt.h="200"/>
+## Passo a Passo
+
+| Passo | Instruções | Imagem |
+|------|------------|--------|
+| **1** | Realizar a troca do resistor R20 de 15Ω para um resistor de 4.7Ω. | <img src="images/R20.png" alt="Montagem" width="200"/> |
+| **2** | Isolar o pino de referência do sensor de efeito HALL "U2" raspando as trilhas conectadas ao GND, em ambos os lados da placa. | <img src="images/Hall_reference.jpeg" alt="Montagem" width="200"/> |
+| **3** | Não realizar a solda do resistor R7, pois ele será soldado em outro local da placa. | <img src="images/R7.png" alt="Montagem" width="200"/> |
+| **4** | Após isolar o pino de referência do sensor de efeito HALL, realizar a solda dele normalmente. Em seguida, soldar um resistor de 150Ω entre o pino de referência e o output do sensor. (Certificar-se de que não há curto-circuito). | <img src="images/RES_HALL.jpeg" alt="Montagem" width="400"/> |
+| **5** | Montagem do snubber: verificar a necessidade, mas a dica de montagem é usar um diodo TVS Schottky 100V, capacitor de 4.7nF 100V e resistor 4.7KΩ 3W. | <img src="images/Snubber.jpeg" alt="Montagem" width="200"/> |
 
 ## Testes
 

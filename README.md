@@ -12,7 +12,7 @@ MPPT Battery charger
 
 <p align="center">
   <img src="images/top.png" alt="3D Top" width="44.5%"/>
-  <img src="images/bottom.png" alt="3D Bottom" width="41.5%"/>
+  <img src="images/bottom.png" alt="3D Bottom" width="41.23%"/>
 </p>
 
 ## Placa Soldada
@@ -20,7 +20,7 @@ MPPT Battery charger
 <p align="center">
   <img src="images/Real_top.jpeg" alt="Soldered Top" width="30%"/>
   <img src="images/Real_bottom.jpeg" alt="Soldered Bottom" width="30%"/>
-  <img src="images/Real_Side.jpeg" alt="Soldered Side" width="20%"/>
+  <img src="images/Real_Side.jpeg" alt="Soldered Side" width="19.7%"/>
 </p>
 
 # Guia de montagem da placa MCC25

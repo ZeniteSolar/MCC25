@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include"conf.h"
 
 #ifndef F_CPU
     #define F_CPU 16000000UL  

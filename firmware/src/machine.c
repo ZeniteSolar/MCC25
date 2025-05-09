@@ -71,6 +71,7 @@ void read_and_check_adcs(void){
 #ifdef ADC_ON
     control.i_panel[0] = ipanel_to_float(ma_adc0());
     control.v_panel[0] = vpanel_to_float(ma_adc1());
+
     //control.vbatt = vbaterry_to_float(ma_adc2); //TODO terminar
     switch(state_machine){
         case STATE_INITIALIZING:
@@ -196,6 +197,14 @@ void machine_run(void){
             if(adc_data_ready){
                 adc_data_ready = 0;
                 read_and_check_adcs();
+
+                usart_send_string(" Vpanel Buffer: ");
+                usart_send_float(control.v_panel[0], 4);
+                usart_send_string(" Ipanel Buffer: ");
+                usart_send_float(control.i_panel[0], 4);
+                usart_send_string(" D buffer: ");
+                usart_send_uint16(control.D);
+                usart_send_char('\n');
             } 
 
             switch(state_machine){

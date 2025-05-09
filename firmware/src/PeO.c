@@ -23,38 +23,37 @@ void perturb_and_observe(void){
     float coef_di = (dii/dvi);
     float coef_def = ((-control.i_panel[0]/control.v_panel[0]));
 
- 
     if(!callSweep){
-        if(dvi != 0){
-            if(coef_di != coef_def){
-                if(coef_di > coef_def){
-                    control.D -= d_step;
-                }else{
-                    control.D +=d_step;
-                }
-            }
-            else{
-                if(dii != 0){
-                    if(dii > 0){
-                        control.D += d_step;
-                    }
-                    else{
-                        control.D -= d_step;
-                    }
-                }
-            }
+        if(dpi > 0){
+            usart_send_string("Increasing: ");
+            usart_send_float(dpi, 4);
+            usart_send_char('\n');
+            control.D += d_step;
+        }else if (dpi==0){
+            control.D = control.D;
         }
-        count++;
-        if(count == 30){
+        else{
+            usart_send_string(" Decreasing: ");
+            usart_send_float(dpi, 4);
+            usart_send_char('\n');
+            control.D -= d_step;
+        }
+         
+        if((control.pi[0] < (max_power*0.6f) || (control.D == 39))){
+            usart_send_string("potencia atual: ");
+            usart_send_float(control.pi[0], 4);
+            usart_send_string(" Maxima potencia: ");
+            usart_send_float(max_power, 4);
+            usart_send_char('\n');
             max_power = 0;
             callSweep = 1;
             done = 0;
         }
+        
     }
     else{
         usart_send_string("SWEEP\n");
         control.sweep_done = 0;
-        //sweep_duty();
     }
 
 
@@ -82,9 +81,8 @@ void sweep_duty(void) {
         else{
             usart_send_string("Maxima potencia\n");
             callSweep = 0;
-        
             control.sweep_done = 1;
-            
+            return;
         }
     }
     if(control.D > PWM_D_MAX){
@@ -94,7 +92,6 @@ void sweep_duty(void) {
 
     if (control.v_panel[0] <= MINIMUM_PANEL_VOLTAGE_MAX_POWER) 
     {
-        max_power_duty_cycle -= d_step;
         control.D = max_power_duty_cycle;
         done = 1;
     }

@@ -35,8 +35,8 @@ float VpanelToFloat(int adcValue);
 
 float VbattToFloat(int adcValue);
 
-#define cbuf_adc0_SIZE         16        // size of buffers
-#define cbuf_adc0_SIZE_2        4         // size of buffers in 2^n
+#define cbuf_adc0_SIZE         32        // size of buffers
+#define cbuf_adc0_SIZE_2        5         // size of buffers in 2^n
 volatile struct cbuf_adc0{
     uint16_t     m_getIdx;
     uint16_t     m_putIdx;
@@ -45,8 +45,8 @@ volatile struct cbuf_adc0{
 uint16_t ma_adc0(void);
 uint16_t avg_adc0;
 
-#define cbuf_adc1_SIZE          16        // size of buffers
-#define cbuf_adc1_SIZE_2        4         // size of buffers in 2^n
+#define cbuf_adc1_SIZE          32       // size of buffers
+#define cbuf_adc1_SIZE_2        5         // size of buffers in 2^n
 volatile struct cbuf_adc1{
     uint16_t     m_getIdx;
     uint16_t     m_putIdx;
@@ -55,8 +55,8 @@ volatile struct cbuf_adc1{
 uint16_t ma_adc1(void);
 uint16_t avg_adc1;
 
-#define cbuf_adc2_SIZE          16        // size of buffers
-#define cbuf_adc2_SIZE_2        4        // size of buffers in 2^n
+#define cbuf_adc2_SIZE          32        // size of buffers
+#define cbuf_adc2_SIZE_2        5        // size of buffers in 2^n
 volatile struct cbuf_adc2{
     uint16_t     m_getIdx;
     uint16_t     m_putIdx;

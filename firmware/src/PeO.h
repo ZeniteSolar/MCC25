@@ -3,7 +3,7 @@
 
 #include"conf.h"
 #include "pwm.h"
-#define PWM_D_STEP 					        1
+#define PWM_D_STEP 					        2
 
 #define MINIMUM_PANEL_VOLTAGE_MAX_POWER  9.0f
 extern volatile float max_power;

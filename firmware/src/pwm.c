@@ -67,7 +67,7 @@ void pwm_compute(void){
         pwm_clk_divider = 0;
         usart_send_string("PWM computed as: ");
         usart_send_uint16((control.D));
-        usart_send_char('\n');
+        //usart_send_char('\n');
 
         usart_send_string(" Vpanel: ");
         usart_send_float(control.v_panel[0], 4);

@@ -15,13 +15,18 @@ int main(void)
     usart_send_string("\n\n\nUSART... OK!\n");
     #endif
 
-    _delay_ms(1000);
+    _delay_ms(200);
 
-    #ifdef PWM_ON
-    usart_send_string("PWM...");
-    pwm_init();
-    set_EN_driver();
+    #ifdef WATCHDOG_ON
+    usart_send_string("WATCHDOG...");
+    wdt_init();
     usart_send_string(" OK!\n");
+    #else
+    usart_send_string("WATCHDOG... OFF!\n");
+    #endif
+
+    #ifdef WATCHDOG_ON
+    wdt_reset();
     #endif
 
     #ifdef ADC_ON
@@ -31,13 +36,20 @@ int main(void)
     #else
     usart_send_string("ADC... OFF!\n");
     #endif
+    
+    #ifdef WATCHDOG_ON
+    wdt_reset();
+    #endif
+
+    #ifdef PWM_ON
+    usart_send_string("PWM...");
+    pwm_init();
+    set_EN_driver();
+    usart_send_string(" OK!\n");
+    #endif
 
     #ifdef WATCHDOG_ON
-    usart_send_string("WATCHDOG...");
-    wdt_init();
-    usart_send_string(" OK!\n");
-    #else
-    usart_send_string("WATCHDOG... OFF!\n");
+    wdt_reset();
     #endif
 
     #ifdef MACHINE_ON
@@ -49,11 +61,15 @@ int main(void)
     usart_send_string("MACHINE... OFF!\n");
     #endif
 
+    #ifdef WATCHDOG_ON
+    wdt_reset();
+    #endif
+
     sei();
     while(1){
-       // #ifdef WATCHDOG_ON
-          //  wdt_reset();
-		//#endif
+       #ifdef WATCHDOG_ON
+           wdt_reset();
+		#endif
 
         #ifdef MACHINE_ON
             machine_run();

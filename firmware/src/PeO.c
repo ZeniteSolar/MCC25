@@ -8,7 +8,8 @@ volatile float max_power;
 volatile float max_power_duty_cycle;
 static uint8_t done;
 static uint8_t callSweep;
-volatile uint8_t count;
+volatile uint16_t count_wdt_trigger = 0;
+static uint16_t top_wdt_trigger = 10*150;                    //quantidade de segundos vezes a frequencia do machine
 
 void perturb_and_observe(void){
     static uint8_t d_step = PWM_D_STEP;
@@ -29,14 +30,21 @@ void perturb_and_observe(void){
             usart_send_float(dpi, 4);
             usart_send_char('\n');
             control.D += d_step;
+            count_wdt_trigger = 0;
         }else if (dpi==0){
             control.D = control.D;
+            if (count_wdt_trigger++ == top_wdt_trigger){
+                usart_send_string("Watchdog triggered\n");
+                for(;;); //waits the watchdog to reset
+                
+            }
         }
         else{
             usart_send_string(" Decreasing: ");
             usart_send_float(dpi, 4);
             usart_send_char('\n');
             control.D -= d_step;
+            count_wdt_trigger = 0;
         }
          
         if((control.pi[0] < (max_power*0.6f) || (control.D == 39))){

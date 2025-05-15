@@ -67,5 +67,6 @@ uint16_t avg_adc2;
 
 float vpanel_to_float(uint16_t vpanel_adc);
 float ipanel_to_float(uint16_t ipanel_adc);
+float vbat_to_float(uint16_t vbat_adc);
 
 #endif /* ifndef _ADC_H_ */

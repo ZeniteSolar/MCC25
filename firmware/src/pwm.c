@@ -74,7 +74,7 @@ void pwm_compute(void){
         usart_send_string(" Ipanel: ");
         usart_send_float(control.i_panel[0],4);
         usart_send_string(" Vbatt: ");
-        usart_send_uint16(ma_adc2());
+        usart_send_float(control.v_batt[0],4);
         usart_send_char('\n');
     }
 #endif

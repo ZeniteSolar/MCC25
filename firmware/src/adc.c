@@ -50,6 +50,10 @@ float vpanel_to_float(uint16_t vpanel_adc)
 {
   return 0.020717284 * (float)vpanel_adc - 0.057896889;
 }
+float vbat_to_float(uint16_t vbat_adc)
+{
+    return 0.0664796828951478 * (float)vbat_adc - 0.156185640842708;
+}
 
 float ipanel_to_float(uint16_t ipanel_adc)
 {

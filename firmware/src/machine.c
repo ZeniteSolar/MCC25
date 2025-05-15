@@ -71,19 +71,20 @@ void read_and_check_adcs(void){
 #ifdef ADC_ON
     control.i_panel[0] = ipanel_to_float(ma_adc0());
     control.v_panel[0] = vpanel_to_float(ma_adc1());
+    control.v_batt[0] = vbat_to_float(ma_adc2());
 
     //control.vbatt = vbaterry_to_float(ma_adc2); //TODO terminar
     switch(state_machine){
         case STATE_INITIALIZING:
             check_panel_voltage();
             check_panel_current();
-            //check_batt_voltage();
+            check_batt_voltage();
 
             break;
         case STATE_RUNNING:
             check_panel_voltage();
             check_panel_current();
-            //check_batt_voltage();
+            check_batt_voltage();
 
             break;      
         default:
@@ -117,7 +118,7 @@ void task_initializing(void){
     //check_buffers();
     check_panel_voltage(); 
     check_panel_current();
-    //check_batt_voltage();
+    check_batt_voltage();
     //set_EN_driver();
 
     if(!error_flags.all){
@@ -131,7 +132,7 @@ void task_initializing(void){
 void task_running(void){
     check_panel_voltage(); 
     check_panel_current();
-    //check_batt_voltage();
+    check_batt_voltage();
     
     #ifdef PWM_ON
         pwm_compute();

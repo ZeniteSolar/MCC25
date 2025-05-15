@@ -19,10 +19,6 @@ void perturb_and_observe(void){
 
     //Derivate power
     float dpi = (control.pi[0]) -(control.pi[1]);
-    float dvi = (control.v_panel[0]) -(control.v_panel[1]);
-    float dii = (control.i_panel[0]) - (control.i_panel[1]);
-    float coef_di = (dii/dvi);
-    float coef_def = ((-control.i_panel[0]/control.v_panel[0]));
 
     if(!callSweep){
         if(dpi > 0){

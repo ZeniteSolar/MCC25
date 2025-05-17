@@ -44,14 +44,20 @@ void perturb_and_observe(void){
         }
          
         if((control.pi[0] < (max_power*0.6f) || (control.D == 39))){
-            usart_send_string("potencia atual: ");
-            usart_send_float(control.pi[0], 4);
-            usart_send_string(" Maxima potencia: ");
-            usart_send_float(max_power, 4);
-            usart_send_char('\n');
-            max_power = 0;
-            callSweep = 1;
-            done = 0;
+            check_batt_voltage();
+            if(error_flags.overvoltage || error_flags.undervoltage){
+                state_machine = STATE_ERROR;
+            }else{
+                usart_send_string("potencia atual: ");
+                usart_send_float(control.pi[0], 4);
+                usart_send_string(" Maxima potencia: ");
+                usart_send_float(max_power, 4);
+                usart_send_char('\n');
+                max_power = 0;
+                callSweep = 1;
+                done = 0;
+            }
+            
         }
         
     }

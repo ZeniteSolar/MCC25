@@ -7,7 +7,8 @@
 #include <util/delay.h>
 volatile uint8_t ADC_CHANNEL = 0;
 volatile float ADC_CONVERTER = 0;
-
+volatile uint8_t cont_adc_vpanel = 0;
+volatile uint8_t cont_adc_ipanel = 0;
 void init_buffers(void)
 {
     CBUF_Init(cbuf_adc0);
@@ -106,19 +107,30 @@ ISR(ADC_vect){
     switch(ADC_CHANNEL){
         case 0:
             CBUF_Push(cbuf_adc0, ADC); 
+            cont_adc_ipanel++;
             ADC_CHANNEL = 1;
             break;
         case 1:
             CBUF_Push(cbuf_adc1, ADC); 
+            cont_adc_vpanel++;
             ADC_CHANNEL = 2;
             break;
         case 2:
             CBUF_Push(cbuf_adc2, ADC);
-            adc_data_ready = 1;
+            if((cont_adc_ipanel == 16) & (cont_adc_vpanel == 16)){
+                cont_adc_ipanel = 0;
+                cont_adc_vpanel = 0;
+                adc_data_ready = 1;
+            }
             ADC_CHANNEL = 0;
             break;
         default:
-            adc_data_ready = 1;
+            if((cont_adc_ipanel == 16) & (cont_adc_vpanel == 16)){
+                cont_adc_ipanel = 0;
+                cont_adc_vpanel = 0;
+                adc_data_ready = 1;
+            }
+
             ADC_CHANNEL = 0; 
             break;
     }

@@ -6,6 +6,10 @@
 volatile control_t control;
 volatile error_flags_t error_flags;
 volatile state_machine_t state_machine;
+
+volatile uint32_t tick = 0;
+volatile uint32_t set_tick = 0;
+
 void machine_init(void)
 {
     TCCR2A  =   (1 << WGM21) | (0 << WGM20)         // Timer 2 in Mode 2 = CTC (clear on compar  e)
@@ -78,13 +82,13 @@ void read_and_check_adcs(void){
         case STATE_INITIALIZING:
             check_panel_voltage();
             check_panel_current();
-            check_batt_voltage();
+            //check_batt_voltage();
 
             break;
         case STATE_RUNNING:
             check_panel_voltage();
             check_panel_current();
-            check_batt_voltage();
+            //check_batt_voltage();
 
             break;      
         default:
@@ -118,7 +122,7 @@ void task_initializing(void){
     //check_buffers();
     check_panel_voltage(); 
     check_panel_current();
-    check_batt_voltage();
+    //check_batt_voltage();
     //set_EN_driver();
 
     if(!error_flags.all){
@@ -132,10 +136,14 @@ void task_initializing(void){
 void task_running(void){
     check_panel_voltage(); 
     check_panel_current();
-    check_batt_voltage();
+    //check_batt_voltage();
     
     #ifdef PWM_ON
-        pwm_compute();
+        if ((tick - set_tick) == 500){
+            set_tick = tick;
+            pwm_compute();
+        }
+        
     #endif
 
 
@@ -179,7 +187,7 @@ void task_error(void){
     if(total_errors < 2){
         usart_send_string("I will reset the machine state.\n");
     }
-    if(total_errors >= 20){
+    if(total_errors >= 5){
         usart_send_string("The watchdog will reset the whole system.\n");
         for(;;);    // waits the watchdog to reset.
     }
@@ -189,33 +197,29 @@ void task_error(void){
 }
 
 void machine_run(void){
-    //#define MACHINE_CLK_DIVIDER_VALUE           10
-    //static uint8_t machine_clk_divider = 0;
     if(machine_clk){
         machine_clk = 0;
-        //if(machine_clk_divider++ == MACHINE_CLK_DIVIDER_VALUE){
-           // machine_clk_divider = 0;
-            if(adc_data_ready){
-                adc_data_ready = 0;
-                read_and_check_adcs();
-            } 
+        if(adc_data_ready){
+            adc_data_ready = 0;
+            read_and_check_adcs();
+        } 
 
-            switch(state_machine){
-                case STATE_INITIALIZING:
-                    task_initializing();
+        switch(state_machine){
+            case STATE_INITIALIZING:
+                task_initializing();
 
-                    break;
-                case STATE_RUNNING:
-                    task_running();
+                break;
+            case STATE_RUNNING:
+                task_running();
 
-                    break;
-                case STATE_ERROR:
-                    task_error();
+                break;
+            case STATE_ERROR:
+                task_error();
 
-                default:
-                    break;
-            }
-        //}
+            default:
+                break;
+        }
+    
     }
 /*     usart_send_string("Ipanel: ");
     usart_send_float(control.i_panel[0], 4);
@@ -230,4 +234,5 @@ ISR(TIMER2_COMPA_vect)
 {
     //if(machine_clk) usart_send_string("\nERROR: CLOCK CONFLICT!!!\n");
 	machine_clk = 1;
+    tick +=10;
 }

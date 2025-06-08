@@ -4,75 +4,71 @@
 #endif
 #include "usart.h"
 
+#define PERTURB_AND_OBSERVE_STEP 1.0f
+#define PERTURB_AND_OBSERVE_INITIAL_DIRECTION 1.0f
+/* This avoid to stop in a maximum local because the direction will only change 
+when the step reduce the power in a significant way */
+#define PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD -0.1f
+
 volatile float max_power;
 volatile float max_power_duty_cycle;
 static uint8_t done;
 static uint8_t callSweep;
-volatile uint16_t count_wdt_trigger = 0;
-static uint16_t top_wdt_trigger = 10*150;                    //quantidade de segundos vezes a frequencia do machine
-
+volatile duty_recycle = 0;
 void perturb_and_observe(void){
-    static uint8_t d_step = PWM_D_STEP;
+    static float step = PERTURB_AND_OBSERVE_STEP;
+    static float direction = PERTURB_AND_OBSERVE_INITIAL_DIRECTION;
 
     // Computes power input
     control.pi[0] = control.v_panel[0] * control.i_panel[0];
 
     //Derivate power
     float dpi = (control.pi[0]) -(control.pi[1]);
+    float ddi = (control.D) - (duty_recycle);
 
-    if(!callSweep){
-        if(dpi > 0){
-            usart_send_string("Increasing: ");
-            usart_send_float(dpi, 4);
-            usart_send_char('\n');
-            control.D += d_step;
-            count_wdt_trigger = 0;
-        }else if (dpi==0){
-            control.D = control.D;
-            if (count_wdt_trigger++ == top_wdt_trigger){
-                usart_send_string("Watchdog triggered\n");
-                for(;;); //waits the watchdog to reset
-                
-            }
-        }
-        else{
-            usart_send_string(" Decreasing: ");
-            usart_send_float(dpi, 4);
-            usart_send_char('\n');
-            control.D -= d_step;
-            count_wdt_trigger = 0;
-        }
-         
-        if((control.pi[0] < (max_power*0.6f) || (control.D == 39))){
-            check_batt_voltage();
-            if(error_flags.overvoltage || error_flags.undervoltage){
-                state_machine = STATE_ERROR;
-            }else{
-                usart_send_string("potencia atual: ");
-                usart_send_float(control.pi[0], 4);
-                usart_send_string(" Maxima potencia: ");
-                usart_send_float(max_power, 4);
-                usart_send_char('\n');
-                max_power = 0;
-                callSweep = 1;
-                done = 0;
-            }
-            
+    if(dpi >= PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD){
+        if(ddi>= PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD){
+            direction = 1.0f;
+        }else{
+            direction = -1.0f;
         }
         
     }
-    else{
-        usart_send_string("SWEEP\n");
-        control.sweep_done = 0;
+    else{  
+        if(ddi>= PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD){
+            direction = -1.0f;
+        }else{
+            direction = 1.0f;
+        }
+        
     }
 
+    usart_send_string("P[0]:");
+    usart_send_float(control.pi[0],4);
+    usart_send_string(" P[-1]:");
+    usart_send_float(control.pi[1],4);
+    usart_send_string(" V:");
+    usart_send_float(control.v_panel[0],4);
+    usart_send_string(" I:");
+    usart_send_float(control.i_panel[0],4);
+    usart_send_string(" D:");
+    usart_send_uint16(control.D);
+    usart_send_string(" DPI:");
+    usart_send_float(dpi,4);
+    usart_send_string(" STEP:");
+    usart_send_float((direction*step),4);
+    usart_send_string("\n");
 
-	// recycles
+    control.D = (uint8_t)(control.D + direction * step);
+    /* Save values for next iteration */
     control.pi[1] = control.pi[0];
+    duty_recycle = control.D;
     control.v_panel[1] = control.v_panel[0];
     control.i_panel[1] = control.i_panel[0];
-    
+
 }
+
+
 void sweep_duty(void) {
     static uint8_t d_step = 1;
     control.pi[0] = control.v_panel[0] * control.i_panel[0];
@@ -95,11 +91,14 @@ void sweep_duty(void) {
             return;
         }
     }
+
+    // limite superior
     if(control.D > PWM_D_MAX){
         control.D = PWM_D_MAX;
         done = 1;
     }
 
+    // tensão minima do painel
     if (control.v_panel[0] <= MINIMUM_PANEL_VOLTAGE_MAX_POWER) 
     {
         control.D = max_power_duty_cycle;

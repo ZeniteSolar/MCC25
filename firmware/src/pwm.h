@@ -36,7 +36,7 @@
 #ifndef PWM_PRESCALE
 #define PWM_PRESCALE    1
 #endif  
-#define PWM_CLK_DIVIDER_VALUE           20 // TODO
+#define PWM_CLK_DIVIDER_VALUE           10 // TODO
 
 // Equations for mode 14 (Fast PWM with TOP in ICR1)
 // Note the resolution. For example.. at 100Khz, ICR1 = PWM_TOP = 159, so it has 7.3 bits of resolution.

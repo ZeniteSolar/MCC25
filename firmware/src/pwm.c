@@ -55,15 +55,12 @@ void pwm_compute(void){
     if(control.D > PWM_D_MAX)        control.D = PWM_D_MAX;
     else if(control.D < PWM_D_MIN)   control.D = PWM_D_MIN;
 
-
-
     // apply dutycycle
+    
     OCR1A = control.D;
 
- 
-
     static uint8_t pwm_clk_divider = 0;
-    if(pwm_clk_divider++ == PWM_CLK_DIVIDER_VALUE){
+    /*if(pwm_clk_divider++ == PWM_CLK_DIVIDER_VALUE){
         pwm_clk_divider = 0;
         usart_send_string("PWM computed as: ");
         usart_send_uint16((control.D));
@@ -75,8 +72,12 @@ void pwm_compute(void){
         usart_send_float(control.i_panel[0],4);
         usart_send_string(" Vbatt: ");
         usart_send_float(control.v_batt[0],4);
+        usart_send_string(" Potencia atual: ");
+        usart_send_float(control.pi[0],4);
+        usart_send_string(" Potencia anterior: ");
+        usart_send_float(control.pi[1], 4);
         usart_send_char('\n');
-    }
+    }*/
 #endif
     
 }

@@ -13,7 +13,7 @@ typedef enum state_PeO{
     increase,
     decrement,
 } state_PeO_t;
-state_PeO_t state_PeO;
+extern state_PeO_t state_PeO;
 
 void perturb_and_observe(void);
 void sweep_duty(void);

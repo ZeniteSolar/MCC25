@@ -15,7 +15,7 @@
     #define F_CPU 16000000UL  
 #endif
 
-uint8_t adc_data_ready;
+extern uint8_t adc_data_ready;
 /* 
 typedef volatile enum adc_channels{ 
     ADC0, ADC1 ,ADC2, ADC3, ADC4, ADC5  
@@ -35,35 +35,35 @@ float VpanelToFloat(int adcValue);
 
 float VbattToFloat(int adcValue);
 
-#define cbuf_adc0_SIZE         16        // size of buffers
-#define cbuf_adc0_SIZE_2        4         // size of buffers in 2^n
-volatile struct cbuf_adc0{
+#define cbuf_adc0_SIZE         32        // size of buffers
+#define cbuf_adc0_SIZE_2        5         // size of buffers in 2^n
+extern volatile struct cbuf_adc0{
     uint16_t     m_getIdx;
     uint16_t     m_putIdx;
     uint16_t     m_entry[cbuf_adc0_SIZE];
 } cbuf_adc0;
 uint16_t ma_adc0(void);
-uint16_t avg_adc0;
+extern uint16_t avg_adc0;
 
-#define cbuf_adc1_SIZE          16       // size of buffers
-#define cbuf_adc1_SIZE_2        4         // size of buffers in 2^n
-volatile struct cbuf_adc1{
+#define cbuf_adc1_SIZE          32       // size of buffers
+#define cbuf_adc1_SIZE_2        5         // size of buffers in 2^n
+extern volatile struct cbuf_adc1{
     uint16_t     m_getIdx;
     uint16_t     m_putIdx;
     uint16_t     m_entry[cbuf_adc1_SIZE];
 } cbuf_adc1; 
 uint16_t ma_adc1(void);
-uint16_t avg_adc1;
+extern uint16_t avg_adc1;
 
-#define cbuf_adc2_SIZE          16        // size of buffers
-#define cbuf_adc2_SIZE_2        4        // size of buffers in 2^n
-volatile struct cbuf_adc2{
+#define cbuf_adc2_SIZE          32        // size of buffers
+#define cbuf_adc2_SIZE_2        5        // size of buffers in 2^n
+extern volatile struct cbuf_adc2{
     uint16_t     m_getIdx;
     uint16_t     m_putIdx;
     uint16_t     m_entry[cbuf_adc2_SIZE];
 } cbuf_adc2;  
 uint16_t ma_adc2(void);
-uint16_t avg_adc2;
+extern uint16_t avg_adc2;
 
 float vpanel_to_float(uint16_t vpanel_adc);
 float ipanel_to_float(uint16_t ipanel_adc);

@@ -2,6 +2,9 @@
 #include "usart.h"
 #include "pwm.h"
 
+// Global variable definitions
+volatile uint8_t machine_clk;
+uint8_t total_errors;   // Contagem de ERROS
 
 volatile control_t control;
 volatile error_flags_t error_flags;
@@ -20,7 +23,7 @@ void machine_init(void)
             | (1 << CS22)                           // clock enabled, prescaller = 1024
             | (1 << CS21)
             | (1 << CS20);
-    OCR2A   =   66;                              // Valor para igualdade de comparacao A par  a frequencia de 150 Hz
+    OCR2A   =   154;                              // Valor para igualdade de comparacao A par  a frequencia de 150 Hz
     TIMSK2 |=   (1 << OCIE2A);                      // Ativa a interrupcao na igualdade de comp  aração do TC2 com OCR2A
 	//TODO revisar isso
 } 
@@ -98,8 +101,8 @@ void read_and_check_adcs(void){
 }
 
 void set_LED(void){
-    set_bit(LED_DDR, LED);
-    set_bit(LED_PORT, LED);
+    // set_bit(LED_DDR, LED);
+    // set_bit(LED_PORT, LED);
 }
 
 void set_EN_driver(void){
@@ -125,23 +128,32 @@ void task_initializing(void){
     //check_batt_voltage();
     //set_EN_driver();
 
-    if(!error_flags.all){
+    if(1){
         usart_send_string("Inicializando o sistema!\n");
         state_machine = STATE_RUNNING;
     }else{
         usart_send_string("Não foi possível inicializar!\n");
-        state_machine = STATE_ERROR;
+        //state_machine = STATE_ERROR;
     }
 }
 void task_running(void){
-    check_panel_voltage(); 
-    check_panel_current();
+    static uint8_t led_state = 0;
+    //check_panel_voltage(); 
+    //check_panel_current();
     //check_batt_voltage();
-    
     #ifdef PWM_ON
         if ((tick - set_tick) == 500){
+            if (led_state == 0){
+                set_bit(LED_DDR, LED);
+                set_bit(LED_PORT, LED);
+            }
+            else{
+                clr_bit(LED_PORT, LED);
+            }
+            led_state = !led_state;
             set_tick = tick;
             pwm_compute();
+            
         }
         
     #endif

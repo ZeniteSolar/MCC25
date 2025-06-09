@@ -3,8 +3,18 @@
 #ifdef USART_ON
     #include "usart.h"
 #endif
-
+#include "machine.h"'
 #include <util/delay.h>
+
+// Global variable definitions
+uint8_t adc_data_ready;
+volatile struct cbuf_adc0 cbuf_adc0;
+uint16_t avg_adc0;
+volatile struct cbuf_adc1 cbuf_adc1;
+uint16_t avg_adc1;
+volatile struct cbuf_adc2 cbuf_adc2;
+uint16_t avg_adc2;
+
 volatile uint8_t ADC_CHANNEL = 0;
 volatile float ADC_CONVERTER = 0;
 volatile uint8_t cont_adc_vpanel = 0;
@@ -23,7 +33,7 @@ uint16_t ma_adc0(void)
     for(uint16_t i = cbuf_adc0_SIZE; i; i--){
         sum += CBUF_Get(cbuf_adc0, i);
     }
-    avg_adc0 = sum >> cbuf_adc0_SIZE_2;
+    avg_adc0 = sum / cbuf_adc0_SIZE;
     return avg_adc0;
 }
 
@@ -103,7 +113,8 @@ void adc_init(void) {
        
 }
 
-ISR(ADC_vect){    
+ISR(ADC_vect){   
+
     switch(ADC_CHANNEL){
         case 0:
             CBUF_Push(cbuf_adc0, ADC); 
@@ -116,25 +127,15 @@ ISR(ADC_vect){
             ADC_CHANNEL = 2;
             break;
         case 2:
+            adc_data_ready = 1;
             CBUF_Push(cbuf_adc2, ADC);
-            if((cont_adc_ipanel == 16) & (cont_adc_vpanel == 16)){
-                cont_adc_ipanel = 0;
-                cont_adc_vpanel = 0;
-                adc_data_ready = 1;
-            }
             ADC_CHANNEL = 0;
             break;
         default:
-            if((cont_adc_ipanel == 16) & (cont_adc_vpanel == 16)){
-                cont_adc_ipanel = 0;
-                cont_adc_vpanel = 0;
-                adc_data_ready = 1;
-            }
 
             ADC_CHANNEL = 0; 
             break;
     }
-
     
     ADMUX = (ADMUX & 0xF8) | ADC_CHANNEL;
 

@@ -31,8 +31,8 @@
 #define ENABLE_DRIVER_DDR DDRB
 #define ENABLE_DRIVER_PORT PORTB
 
-volatile uint8_t machine_clk;
-uint8_t total_errors;   // Contagem de ERROS
+extern volatile uint8_t machine_clk;
+extern uint8_t total_errors;   // Contagem de ERROS
 
 typedef enum state_machine{
     STATE_INITIALIZING,
@@ -43,7 +43,7 @@ typedef enum state_machine{
 extern volatile state_machine_t state_machine;
 
 typedef struct control{
-    uint8_t    D;              // value converted from 0 to TOP
+    uint16_t    D;              // value converted from 0 to TOP
     uint8_t  sweep_done;
     float    i_panel[2];              // value of panel current in AMPS
     float    v_panel[2];              // value of panel voltage in VOLTS

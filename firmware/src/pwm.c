@@ -49,6 +49,18 @@ void pwm_compute(void){
         perturb_and_observe();
     }
     
+    usart_send_string("P[0]:");
+    usart_send_float(control.pi[0],4);
+    usart_send_string(" P[-1]:");
+    usart_send_float(control.pi[1],4);
+    usart_send_string(" V:");
+    usart_send_float(control.v_panel[0],4);
+    usart_send_string(" I:");
+    usart_send_float(control.i_panel[0],4);
+    usart_send_string(" D:");
+    usart_send_uint16(control.D);
+    usart_send_string("\n");
+
    // perturb_and_observe();
 
     // apply some threshhold saturation limits

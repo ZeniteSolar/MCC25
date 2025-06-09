@@ -10,11 +10,14 @@
 when the step reduce the power in a significant way */
 #define PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD -0.1f
 
+// Global variable definitions
+state_PeO_t state_PeO;
 volatile float max_power;
 volatile float max_power_duty_cycle;
+
 static uint8_t done;
 static uint8_t callSweep;
-volatile duty_recycle = 0;
+
 void perturb_and_observe(void){
     static float step = PERTURB_AND_OBSERVE_STEP;
     static float direction = PERTURB_AND_OBSERVE_INITIAL_DIRECTION;
@@ -24,45 +27,22 @@ void perturb_and_observe(void){
 
     //Derivate power
     float dpi = (control.pi[0]) -(control.pi[1]);
-    float ddi = (control.D) - (duty_recycle);
 
-    if(dpi >= PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD){
-        if(ddi>= PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD){
-            direction = 1.0f;
-        }else{
-            direction = -1.0f;
-        }
-        
-    }
-    else{  
-        if(ddi>= PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD){
-            direction = -1.0f;
-        }else{
-            direction = 1.0f;
-        }
-        
+    if(dpi <= PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD){
+        step = PERTURB_AND_OBSERVE_STEP;
+        direction = -direction;
     }
 
-    usart_send_string("P[0]:");
-    usart_send_float(control.pi[0],4);
-    usart_send_string(" P[-1]:");
-    usart_send_float(control.pi[1],4);
-    usart_send_string(" V:");
-    usart_send_float(control.v_panel[0],4);
-    usart_send_string(" I:");
-    usart_send_float(control.i_panel[0],4);
-    usart_send_string(" D:");
-    usart_send_uint16(control.D);
-    usart_send_string(" DPI:");
-    usart_send_float(dpi,4);
-    usart_send_string(" STEP:");
-    usart_send_float((direction*step),4);
-    usart_send_string("\n");
+    step += 0.3f;
+    if (step > 3.0f)
+    {
+        step = 3.0f;
+    }
 
-    control.D = (uint8_t)(control.D + direction * step);
+    control.D = (uint16_t)(control.D + direction * step);
+
     /* Save values for next iteration */
     control.pi[1] = control.pi[0];
-    duty_recycle = control.D;
     control.v_panel[1] = control.v_panel[0];
     control.i_panel[1] = control.i_panel[0];
 
@@ -72,6 +52,8 @@ void perturb_and_observe(void){
 void sweep_duty(void) {
     static uint8_t d_step = 1;
     control.pi[0] = control.v_panel[0] * control.i_panel[0];
+
+
 
     if(control.pi[0] > max_power){
         max_power = control.pi[0];

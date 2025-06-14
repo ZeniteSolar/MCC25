@@ -85,13 +85,13 @@ void read_and_check_adcs(void){
         case STATE_INITIALIZING:
             check_panel_voltage();
             check_panel_current();
-            //check_batt_voltage();
+            check_batt_voltage();
 
             break;
         case STATE_RUNNING:
             check_panel_voltage();
             check_panel_current();
-            //check_batt_voltage();
+            check_batt_voltage();
 
             break;      
         default:
@@ -101,8 +101,8 @@ void read_and_check_adcs(void){
 }
 
 void set_LED(void){
-    // set_bit(LED_DDR, LED);
-    // set_bit(LED_PORT, LED);
+    set_bit(LED_DDR, LED);
+    set_bit(LED_PORT, LED);
 }
 
 void set_EN_driver(void){
@@ -125,32 +125,24 @@ void task_initializing(void){
     //check_buffers();
     check_panel_voltage(); 
     check_panel_current();
-    //check_batt_voltage();
+    check_batt_voltage();
     //set_EN_driver();
 
-    if(1){
+    if(!error_flags.all){
         usart_send_string("Inicializando o sistema!\n");
         state_machine = STATE_RUNNING;
     }else{
         usart_send_string("Não foi possível inicializar!\n");
-        //state_machine = STATE_ERROR;
+        state_machine = STATE_ERROR;
     }
 }
 void task_running(void){
     static uint8_t led_state = 0;
-    //check_panel_voltage(); 
-    //check_panel_current();
-    //check_batt_voltage();
+    check_panel_voltage(); 
+    check_panel_current();
+    check_batt_voltage();
     #ifdef PWM_ON
         if ((tick - set_tick) == 500){
-            if (led_state == 0){
-                set_bit(LED_DDR, LED);
-                set_bit(LED_PORT, LED);
-            }
-            else{
-                clr_bit(LED_PORT, LED);
-            }
-            led_state = !led_state;
             set_tick = tick;
             pwm_compute();
             

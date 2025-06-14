@@ -33,7 +33,7 @@ void perturb_and_observe(void){
         direction = -direction;
     }
 
-    step += 0.3f;
+    step += 0.15f;
     if (step > 3.0f)
     {
         step = 3.0f;

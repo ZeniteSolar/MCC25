@@ -3,7 +3,7 @@
 #ifdef USART_ON
     #include "usart.h"
 #endif
-#include "machine.h"'
+#include "machine.h"
 #include <util/delay.h>
 
 // Global variable definitions
@@ -33,7 +33,7 @@ uint16_t ma_adc0(void)
     for(uint16_t i = cbuf_adc0_SIZE; i; i--){
         sum += CBUF_Get(cbuf_adc0, i);
     }
-    avg_adc0 = sum / cbuf_adc0_SIZE;
+    avg_adc0 = sum >> cbuf_adc0_SIZE_2;
     return avg_adc0;
 }
 

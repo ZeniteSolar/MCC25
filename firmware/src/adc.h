@@ -29,12 +29,6 @@ void adc_init(void);
 
 void init_buffers(void);
 
-float IpanelToFloat(int adcValue);
-
-float VpanelToFloat(int adcValue);
-
-float VbattToFloat(int adcValue);
-
 #define cbuf_adc0_SIZE         64        // size of buffers
 #define cbuf_adc0_SIZE_2        6         // size of buffers in 2^n
 extern volatile struct cbuf_adc0{

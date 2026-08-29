@@ -4,87 +4,109 @@
 #endif
 #include "usart.h"
 
-#define PERTURB_AND_OBSERVE_STEP 1.0f
-#define PERTURB_AND_OBSERVE_INITIAL_DIRECTION 1.0f
-/* This avoid to stop in a maximum local because the direction will only change 
-when the step reduce the power in a significant way */
-#define PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD -0.1f
-
-// Global variable definitions
-state_PeO_t state_PeO;
+// ─── Variáveis globais ─────────────────────────────────────────────
 volatile float max_power;
 volatile float max_power_duty_cycle;
 
-static uint8_t done;
-static uint8_t callSweep;
+// ─── Variáveis internas do sweep ───────────────────────────────────
+static uint8_t sweep_finished_ascending;
 
-void perturb_and_observe(void){
-    static float step = PERTURB_AND_OBSERVE_STEP;
-    static float direction = PERTURB_AND_OBSERVE_INITIAL_DIRECTION;
+// ═══════════════════════════════════════════════════════════════════
+// Perturb & Observe — Algoritmo clássico com step fixo
+// ═══════════════════════════════════════════════════════════════════
+//
+// Lógica:
+//   1. Calcula a potência atual P[0] = V_panel × I_panel
+//   2. Compara com a potência da iteração anterior P[-1]
+//   3. Se P caiu (dP < 0) → inverte a direção da perturbação
+//      Se P subiu ou ficou igual (dP >= 0) → mantém a direção
+//   4. Aplica D = D + direction × PEO_STEP
+//   5. Satura D nos limites [PWM_D_MIN, PWM_D_MAX]
+//
+// Isso garante:
+//   - Step constante (sem acúmulo → sem oscilação crescente)
+//   - Convergência suave para o MPP
+//   - Comportamento previsível e depurável
+//
+void perturb_and_observe(void) {
+    static int8_t direction = 1;
 
-    // Computes power input
+    // 1. Calcula potência de entrada atual
     control.pi[0] = control.v_panel[0] * control.i_panel[0];
 
-    //Derivate power
-    float dpi = (control.pi[0]) -(control.pi[1]);
+    // 2. Derivada de potência
+    float dpi = control.pi[0] - control.pi[1];
 
-    if(dpi <= PERTURB_AND_OBSERVE_DERIVATIVE_THRESHOLD){
-        step = PERTURB_AND_OBSERVE_STEP;
+    // 3. P&O clássico: se potência caiu, inverte direção
+    if (dpi < 0.0f) {
         direction = -direction;
     }
+    // Se dpi >= 0, mantém a direção atual (está melhorando ou estável)
 
-    step += 0.15f;
-    if (step > 3.0f)
-    {
-        step = 3.0f;
-    }
+    // 4. Aplica perturbação com step fixo inteiro, já com clamp
+    int16_t new_D = (int16_t)control.D + (int16_t)(direction * PEO_STEP);
 
-    control.D = (uint16_t)(control.D + direction * step);
+    if (new_D > (int16_t)PWM_D_MAX)  new_D = (int16_t)PWM_D_MAX;
+    if (new_D < (int16_t)PWM_D_MIN)  new_D = (int16_t)PWM_D_MIN;
 
-    /* Save values for next iteration */
-    control.pi[1] = control.pi[0];
-    control.v_panel[1] = control.v_panel[0];
-    control.i_panel[1] = control.i_panel[0];
+    control.D = (uint16_t)new_D;
 
+    // 5. Salva valores para próxima iteração
+    control.pi[1]      = control.pi[0];
+    control.v_panel[1]  = control.v_panel[0];
+    control.i_panel[1]  = control.i_panel[0];
 }
 
-
+// ═══════════════════════════════════════════════════════════════════
+// Sweep Inicial — Varredura para encontrar ponto de máxima potência
+// ═══════════════════════════════════════════════════════════════════
+//
+// Chamado repetidamente por pwm_compute() até sweep_done = 1.
+// Varre D de PWM_D_MIN até PWM_D_MAX (ou até a tensão do painel
+// cair demais), registra o D que deu mais potência, e depois
+// retorna para esse ponto.
+//
 void sweep_duty(void) {
-    static uint8_t d_step = 1;
     control.pi[0] = control.v_panel[0] * control.i_panel[0];
 
-
-
-    if(control.pi[0] > max_power){
+    // Registra máximo encontrado
+    if (control.pi[0] > max_power) {
         max_power = control.pi[0];
         max_power_duty_cycle = control.D;
     }
-    if(!done){
-        control.D +=d_step;
-    }
-    else{
-        if(control.D > max_power_duty_cycle){
-            control.D -= d_step;
+
+    if (!sweep_finished_ascending) {
+        // Fase 1: subindo o duty
+        control.D += 1;
+
+        // Atingiu limite superior → começa a descer
+        if (control.D > (uint16_t)PWM_D_MAX) {
+            control.D = (uint16_t)PWM_D_MAX;
+            sweep_finished_ascending = 1;
         }
-        else{
-            usart_send_string("Maxima potencia\n");
-            callSweep = 0;
+
+        // Tensão do painel caiu demais → para e volta
+        if (control.v_panel[0] <= MINIMUM_PANEL_VOLTAGE_MAX_POWER) {
+            control.D = (uint16_t)max_power_duty_cycle;
+            sweep_finished_ascending = 1;
+        }
+    } else {
+        // Fase 2: descendo até o ponto de máxima potência
+        if (control.D > (uint16_t)max_power_duty_cycle) {
+            control.D -= 1;
+        } else {
+            // Chegou no ponto ótimo — sweep concluído
+            usart_send_string("Sweep OK! D_max=");
+            usart_send_uint16((uint16_t)max_power_duty_cycle);
+            usart_send_string(" P_max=");
+            usart_send_float(max_power, 4);
+            usart_send_string("\n");
+
+            // Inicializa P[-1] para o P&O começar com referência válida
+            control.pi[1] = control.pi[0];
+
             control.sweep_done = 1;
-            return;
+            sweep_finished_ascending = 0;  // reseta para eventual re-sweep
         }
     }
-
-    // limite superior
-    if(control.D > PWM_D_MAX){
-        control.D = PWM_D_MAX;
-        done = 1;
-    }
-
-    // tensão minima do painel
-    if (control.v_panel[0] <= MINIMUM_PANEL_VOLTAGE_MAX_POWER) 
-    {
-        control.D = max_power_duty_cycle;
-        done = 1;
-    }
-
 }

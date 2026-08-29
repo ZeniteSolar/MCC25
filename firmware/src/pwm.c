@@ -15,11 +15,11 @@ void pwm_init(void)
             #if PWM_PRESCALE ==     1
                         (0 << CS12) | (0 << CS11) | (1 << CS10) // Prescaler N=1
             #elif PWM_PRESCALE ==   8
-                        (0 << CS12) | (0 << CS11) | (1 << CS10) // Prescaler N=8
+                        (0 << CS12) | (1 << CS11) | (0 << CS10) // Prescaler N=8
             #elif PWM_PRESCALE ==   64
-                        (0 << CS12) | (1 << CS11) | (0 << CS10) // Prescaler N=64
+                        (0 << CS12) | (1 << CS11) | (1 << CS10) // Prescaler N=64
             #elif PWM_PRESCALE ==   256
-                        (0 << CS12) | (1 << CS11) | (1 << CS10) // Prescaler N=256
+                        (1 << CS12) | (0 << CS11) | (0 << CS10) // Prescaler N=256
             #elif PWM_PRESCALE ==   1024
                         (1 << CS12) | (0 << CS11) | (1 << CS10) // Prescaler N=1024
             #else 
@@ -49,6 +49,7 @@ void pwm_compute(void){
         perturb_and_observe();
     }
     
+    // Log de debug via USART
     usart_send_string("P[0]:");
     usart_send_float(control.pi[0],4);
     usart_send_string(" P[-1]:");
@@ -59,37 +60,13 @@ void pwm_compute(void){
     usart_send_float(control.i_panel[0],4);
     usart_send_string(" D:");
     usart_send_uint16(control.D);
+    usart_send_string(" Vbatt:");
+    usart_send_float(control.v_batt[0],4);
     usart_send_string("\n");
 
-   // perturb_and_observe();
-
-    // apply some threshhold saturation limits
-    if(control.D > PWM_D_MAX)        control.D = PWM_D_MAX;
-    else if(control.D < PWM_D_MIN)   control.D = PWM_D_MIN;
-
-    // apply dutycycle
-    
+    // Aplica duty cycle no registrador do Timer1
+    // (a saturação de D já é feita dentro de perturb_and_observe e sweep_duty)
     OCR1A = control.D;
 
-    static uint8_t pwm_clk_divider = 0;
-    /*if(pwm_clk_divider++ == PWM_CLK_DIVIDER_VALUE){
-        pwm_clk_divider = 0;
-        usart_send_string("PWM computed as: ");
-        usart_send_uint16((control.D));
-        //usart_send_char('\n');
-
-        usart_send_string(" Vpanel: ");
-        usart_send_float(control.v_panel[0], 4);
-        usart_send_string(" Ipanel: ");
-        usart_send_float(control.i_panel[0],4);
-        usart_send_string(" Vbatt: ");
-        usart_send_float(control.v_batt[0],4);
-        usart_send_string(" Potencia atual: ");
-        usart_send_float(control.pi[0],4);
-        usart_send_string(" Potencia anterior: ");
-        usart_send_float(control.pi[1], 4);
-        usart_send_char('\n');
-    }*/
 #endif
-    
 }

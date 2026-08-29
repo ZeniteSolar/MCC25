@@ -44,7 +44,8 @@ int main(void)
     #ifdef PWM_ON
     usart_send_string("PWM...");
     pwm_init();
-    set_EN_driver();
+    // Configura PB3 como saída LOW (driver desabilitado até validação da FSM)
+    set_bit(ENABLE_DRIVER_DDR, ENABLE_DRIVER);
     usart_send_string(" OK!\n");
     #endif
 
@@ -63,6 +64,14 @@ int main(void)
 
     #ifdef WATCHDOG_ON
     wdt_reset();
+    #endif
+
+    #ifdef ANALOG_COMP_ON
+    usart_send_string("ANALOG_COMP...");
+    analog_comp_init();
+    usart_send_string(" OK!\n");
+    #else
+    usart_send_string("ANALOG_COMP... OFF!\n");
     #endif
 
     sei();

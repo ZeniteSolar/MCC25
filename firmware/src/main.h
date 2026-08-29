@@ -49,4 +49,11 @@
 #pragma message "WATCHDOG: OFF!"
 #endif /*ifdef WATCHDOG_ON*/
 
+#ifdef ANALOG_COMP_ON
+#include "analog_comp.h"
+#pragma message "ANALOG_COMP: ON!"
+#else
+#pragma message "ANALOG_COMP: OFF!"
+#endif /*ifdef ANALOG_COMP_ON*/
+
 #endif /* ifndef MAIN_H */

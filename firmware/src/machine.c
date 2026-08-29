@@ -23,7 +23,7 @@ void machine_init(void)
             | (1 << CS22)                           // clock enabled, prescaller = 1024
             | (1 << CS21)
             | (1 << CS20);
-    OCR2A   =   154;                              // Valor para igualdade de comparacao A par  a frequencia de 150 Hz
+    OCR2A   =   154;                              // Valor para igualdade de comparacao A para frequencia de ~100 Hz
     TIMSK2 |=   (1 << OCIE2A);                      // Ativa a interrupcao na igualdade de comp  aração do TC2 com OCR2A
 	//TODO revisar isso
 } 
@@ -40,38 +40,49 @@ void check_buffers(void)
 
 void check_panel_voltage(void)
 {
+    uint8_t over = 0;
+    uint8_t under = 0;
+    
     if(control.v_panel[0] >= MAXIMUM_PANEL_VOLTAGE){
-        error_flags.overvolt_panel = 1;
+        over = 1;
     }
     else if(control.v_panel[0] <= MINIMUM_PANEL_VOLTAGE){
-        error_flags.undervolt_panel = 1;
+        under = 1;
     }
-    else{
-        error_flags.overvolt_panel = 0;
-        error_flags.undervolt_panel = 0;
-        error_flags.overvoltage = 0;
-        error_flags.undervoltage = 0;
-    }
+    
+    cli();
+    error_flags.overvolt_panel = over;
+    error_flags.undervolt_panel = under;
+    sei();
 }
 
 void check_panel_current(void)
 {
+    uint8_t over = 0;
+    
     if(control.i_panel[0] >= MAXIMUM_PANEL_CURRENT)
     {
-        error_flags.overcurrent = 1;
+        over = 1;
     }
-    else{
-        error_flags.overcurrent = 0;
-    }
+    
+    cli();
+    error_flags.overcurrent = over;
+    sei();
 }
 void check_batt_voltage(void){
     if(control.v_batt[0] >= MAXIMUM_BATT_VOLTAGE){
         error_flags.overvoltage = 1;
-    } else if(control.v_batt[0] <= MINIMUM_BATT_VOLTAGE){
-        error_flags.undervoltage = 1;
+    //} else if(control.v_batt[0] <= MINIMUM_BATT_VOLTAGE){
+        //error_flags.undervoltage = 1;
     } else{
-        error_flags.overvoltage = 0;
-        error_flags.undervoltage = 0;
+        // Protege contra race condition com a ISR do comparador analógico:
+        // só limpa overvoltage se NÃO foi detectada pelo hardware
+        cli();
+        if (!error_flags.overvoltage_hw) {
+            error_flags.overvoltage = 0;
+        }
+        //error_flags.undervoltage = 0;
+        sei();
     }
 }
 void read_and_check_adcs(void){
@@ -130,6 +141,7 @@ void task_initializing(void){
 
     if(!error_flags.all){
         usart_send_string("Inicializando o sistema!\n");
+        set_EN_driver(); // Liga o driver de forma segura antes de operar
         state_machine = STATE_RUNNING;
     }else{
         usart_send_string("Não foi possível inicializar!\n");
@@ -137,17 +149,16 @@ void task_initializing(void){
     }
 }
 void task_running(void){
-    static uint8_t led_state = 0;
-    check_panel_voltage(); 
-    check_panel_current();
-    check_batt_voltage();
+    if(error_flags.all){
+        state_machine = STATE_ERROR;
+        return;
+    }
+
     #ifdef PWM_ON
-        if ((tick - set_tick) == 500){
+        if ((tick - set_tick) >= 500){
             set_tick = tick;
             pwm_compute();
-            
         }
-        
     #endif
 
 
@@ -165,10 +176,17 @@ void task_running(void){
 void task_error(void){
     #ifdef PWM_ON
         pwm_reset();
+        clr_EN_driver();
         clr_bit(LED_PORT,LED);
     #endif
 
-    total_errors++;         // incrementa a contagem de erros
+    // Incrementa total_errors apenas na transição para estado de erro
+    static state_machine_t prev_state = STATE_INITIALIZING;
+    if (prev_state != STATE_ERROR) {
+        total_errors++;
+        prev_state = STATE_ERROR;
+    }
+
     usart_send_string("The error code is: ");
     usart_send_uint16(error_flags.all);
     usart_send_char('\n');
@@ -179,8 +197,10 @@ void task_error(void){
         usart_send_string("\t - Battery over-voltage!\n");
     if(error_flags.undervolt_panel)
         usart_send_string("\t - Panel under-voltage!\n");
-    if(error_flags.undervoltage)
-        usart_send_string("\t - Baterry under-voltage!\n");
+    //if(error_flags.undervoltage)
+        //usart_send_string("\t - Baterry under-voltage!\n");
+    if(error_flags.overvoltage_hw)
+        usart_send_string("\t - HARDWARE Battery over-voltage!\n");
     if(!error_flags.all)
         usart_send_string("\t - Oh no, it was some unknown error.\n");
 
@@ -196,8 +216,14 @@ void task_error(void){
         for(;;);    // waits the watchdog to reset.
     }
  
-    state_machine = STATE_INITIALIZING;
+    // Limpa a flag de HW para que o software (check_batt_voltage) 
+    // decida se a tensão já baixou na próxima inicialização
+    cli();
+    error_flags.overvoltage_hw = 0;
+    sei();
 
+    state_machine = STATE_INITIALIZING;
+    prev_state = STATE_INITIALIZING;
 }
 
 void machine_run(void){
@@ -219,7 +245,7 @@ void machine_run(void){
                 break;
             case STATE_ERROR:
                 task_error();
-
+                break;
             default:
                 break;
         }

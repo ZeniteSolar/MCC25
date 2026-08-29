@@ -19,8 +19,8 @@
 //DEFINIÇÕES DE MEDIDAS
 #define MAXIMUM_PANEL_CURRENT 11.0f //11A
 #define MAXIMUM_PANEL_VOLTAGE 24.0f // 21V
-#define MAXIMUM_BATT_VOLTAGE 54.0f // 60V
-#define MINIMUM_BATT_VOLTAGE 28.0f //33V
+#define MAXIMUM_BATT_VOLTAGE 43.0f // 60V
+//#define MINIMUM_BATT_VOLTAGE 28.0f //33V
 #define MINIMUM_PANEL_VOLTAGE 9.0f //9V
 
 //DEFINIÇÕES GERAIS
@@ -56,11 +56,12 @@ extern volatile control_t control;
 
 typedef union error_flags{
     struct{
-        uint8_t     overcurrent :1;
-        uint8_t     overvoltage :1;
-		uint8_t		undervoltage:1;
-		uint8_t		overvolt_panel:1;
-		uint8_t		undervolt_panel:1;
+        uint8_t     overcurrent     :1;
+        uint8_t     overvoltage     :1;
+        //uint8_t     undervoltage    :1;
+        uint8_t     overvolt_panel  :1;
+        uint8_t     undervolt_panel :1;
+        uint8_t     overvoltage_hw  :1;  // Setada APENAS pela ISR do comparador analógico
     };
     uint8_t   all;
 }error_flags_t;
